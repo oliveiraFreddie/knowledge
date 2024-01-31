@@ -2,7 +2,12 @@ module.exports = app => {
     const { existsOrError, notExistsOrError } = app.api.validation
 
     const save = (req, res) => {
-        const category = { ...req.body }
+        const category = {
+            id: req.body.id,
+            name: req.body.name,
+            parentId: req.body.parentId
+        }
+
         if (req.params.id) category.id = req.params.id
 
         try {
@@ -16,7 +21,7 @@ module.exports = app => {
                 .update(category)
                 .where({ id: category.id })
                 .then(_ => res.status(204).send())
-                .catch(err => res.status(500))
+                .catch(err => res.status(500).send(err))
         } else {
             app.db('categories')
                 .insert(category)
@@ -27,21 +32,19 @@ module.exports = app => {
 
     const remove = async (req, res) => {
         try {
-            existsOrError(req.params.id, 'Código da categoria não informado')
+            existsOrError(req.params.id, 'Código da Categoria não informado.')
 
             const subcategory = await app.db('categories')
                 .where({ parentId: req.params.id })
-
-            notExistsOrError(subcategory, 'Categoria possui subcategorias')
+            notExistsOrError(subcategory, 'Categoria possui subcategorias.')
 
             const articles = await app.db('articles')
                 .where({ categoryId: req.params.id })
-
-            notExistsOrError(articles, 'Categoria possui artigos')
+            notExistsOrError(articles, 'Categoria possui artigos.')
 
             const rowsDeleted = await app.db('categories')
                 .where({ id: req.params.id }).del()
-            existsOrError(rowsDeleted, 'Categoria não foi encontrada')
+            existsOrError(rowsDeleted, 'Categoria não foi encontrada.')
 
             res.status(204).send()
         } catch (msg) {
@@ -91,19 +94,13 @@ module.exports = app => {
     }
 
     const toTree = (categories, tree) => {
-        // Se 'tree' não for fornecido, inicializamos com as categorias que não têm parentId (nós raiz)
         if (!tree) tree = categories.filter(c => !c.parentId)
-        // Mapeamos cada nó pai para transformá-lo em um objeto de árvore
         tree = tree.map(parentNode => {
-            // Função que verifica se um nó é filho do nó pai atual
             const isChild = node => node.parentId == parentNode.id
-            // Chamamos recursivamente 'toTree' para encontrar os filhos do nó pai atual
             parentNode.children = toTree(categories, categories.filter(isChild))
-            // Retornamos o nó pai com seus filhos
             return parentNode
         })
-        // Retornamos a árvore resultante
-        return tree;
+        return tree
     }
 
     const getTree = (req, res) => {
@@ -111,7 +108,6 @@ module.exports = app => {
             .then(categories => res.json(toTree(categories)))
             .catch(err => res.status(500).send(err))
     }
-
 
     return { save, remove, get, getById, getTree }
 }
