@@ -90,5 +90,28 @@ module.exports = app => {
             .catch(err => res.status(500).send(err))
     }
 
-    return { save, remove, get, getById }
+    const toTree = (categories, tree) => {
+        // Se 'tree' não for fornecido, inicializamos com as categorias que não têm parentId (nós raiz)
+        if (!tree) tree = categories.filter(c => !c.parentId)
+        // Mapeamos cada nó pai para transformá-lo em um objeto de árvore
+        tree = tree.map(parentNode => {
+            // Função que verifica se um nó é filho do nó pai atual
+            const isChild = node => node.parentId == parentNode.id
+            // Chamamos recursivamente 'toTree' para encontrar os filhos do nó pai atual
+            parentNode.children = toTree(categories, categories.filter(isChild))
+            // Retornamos o nó pai com seus filhos
+            return parentNode
+        })
+        // Retornamos a árvore resultante
+        return tree;
+    }
+
+    const getTree = (req, res) => {
+        app.db('categories')
+            .then(categories => res.json(toTree(categories)))
+            .catch(err => res.status(500).send(err))
+    }
+
+
+    return { save, remove, get, getById, getTree }
 }
