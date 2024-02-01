@@ -85,5 +85,13 @@ module.exports = app => {
         }
     }
 
-    return { save, get, getById, remove }
+    const ativar = (req, res) => {
+        app.db('users')
+            .update({ deletedAt: null })
+            .where({ id: req.params.id })
+            .then(_ => res.status(200).send())
+            .catch(err => res.status(500).send(err))
+    }
+
+    return { save, get, getById, remove, ativar }
 }
