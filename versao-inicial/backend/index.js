@@ -3,6 +3,8 @@ const consign = require("consign");
 const db = require('./config/db')
 const mongoose = require('mongoose')
 
+const PORT = process.env.PORT || 3000;
+
 require('./config/mongodb')
 
 app.db = db
@@ -17,6 +19,6 @@ consign()
     .then("./config/routes.js")
     .into(app);
 
-app.listen(3000, () => {
-    console.log("Backend INICIAL executando...");
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
