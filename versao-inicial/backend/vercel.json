@@ -8,9 +8,12 @@
     ],
     "routes": [
         {
+            "src": "/config/routes.js",
+            "dest": "/index.js"
+        },
+        {
             "src": "(.*)",
             "dest": "/index.js"
         }
     ]
-
 }
