@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "vercel-build": "knex migrate:latest && npm run production",
-    "build": "knex migrate:latest && npm run production",
     "start": "nodemon",
     "production": "pm2 start index.js --name knowledge-backend"
   },
