@@ -8,6 +8,8 @@ require("./config/mongodb");
 app.db = db;
 app.mongoose = mongoose;
 
+const port = process.env.PORT || 3000;
+
 consign()
     .include("./config/passport.js")
     .then("./config/middlewares.js")
@@ -17,6 +19,6 @@ consign()
     .then("./config/routes.js")
     .into(app);
 
-app.listen(3000, () => {
-    console.log("Backend INICIAL executando...");
+app.listen(port, () => {
+    console.log(`Backend INICIAL executando na porta ${port}...`);
 });
